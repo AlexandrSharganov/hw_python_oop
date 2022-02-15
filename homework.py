@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Union, Optional
 
 
-@dataclass
+@dataclass(repr=False, eq=False)
 class InfoMessage:
     """Информационное сообщение о тренировке."""
     training_type: str
@@ -12,24 +12,25 @@ class InfoMessage:
     calories: float
 
     def get_message(self) -> str:
-        return (f'Тип тренировки: {self.training_type}; '
-                f'Длительность: {self.duration:.3f} ч.; '
-                f'Дистанция: {self.distance:.3f} км; '
-                f'Ср. скорость: {self.speed:.3f} км/ч; '
-                f'Потрачено ккал: {self.calories:.3f}.')
+        text_message: str = (f'Тип тренировки: {self.training_type}; '
+                             f'Длительность: {self.duration:.3f} ч.; '
+                             f'Дистанция: {self.distance:.3f} км; '
+                             f'Ср. скорость: {self.speed:.3f} км/ч; '
+                             f'Потрачено ккал: {self.calories:.3f}.')
+        return text_message
 
 
-@dataclass
+@dataclass(repr=False, eq=False)
 class Training:
     """Базовый класс тренировки."""
-
-    LEN_STEP = 0.65
-    M_IN_KM = 1000
-    MINUTES_IN_HOUR = 60
 
     action: int
     duration: float
     weight: float
+
+    LEN_STEP = 0.65
+    M_IN_KM = 1000
+    MINUTES_IN_HOUR = 60
 
     def get_distance(self) -> float:
         """Получить дистанцию в км."""
@@ -41,8 +42,7 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получить количество затраченных калорий."""
-        raise NotImplementedError(
-            'Определите run в %s.' % (type(self).__name__))
+        raise NotImplementedError(f'Определите run в {type(self).__name__}')
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -53,7 +53,7 @@ class Training:
                            self.get_spent_calories())
 
 
-@dataclass
+@dataclass(repr=False, eq=False)
 class Running(Training):
     """Тренировка: бег."""
 
@@ -67,15 +67,15 @@ class Running(Training):
                 * (self.duration * self.MINUTES_IN_HOUR))
 
 
-@dataclass
+@dataclass(repr=False, eq=False)
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
+
+    height: float
 
     CALORIES_WEIGHT_MULTIPLIER = 0.035
     CALORIES_SPEED_POWER = 2
     CALORIES_WEIGHT_COEFF = 0.029
-
-    height: float
 
     def get_spent_calories(self):
         return ((self.CALORIES_WEIGHT_MULTIPLIER * self.weight
@@ -85,15 +85,16 @@ class SportsWalking(Training):
                 * self.duration * self.MINUTES_IN_HOUR)
 
 
-@dataclass
+@dataclass(repr=False, eq=False)
 class Swimming(Training):
     """Тренировка: плавание."""
-    LEN_STEP = 1.38
-    CALORIES_SPEED_MULTIPLIER = 1.1
-    CALORIES_WEIGHT_MULTIPLIER = 2
 
     length_pool: float
     count_pool: float
+
+    LEN_STEP = 1.38
+    CALORIES_SPEED_MULTIPLIER = 1.1
+    CALORIES_WEIGHT_MULTIPLIER = 2
 
     def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения."""
